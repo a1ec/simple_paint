@@ -117,7 +117,7 @@ class Type(Tool):
     def __init__(self, app):
         super().__init__(app)
         self.text = ''
-        self.font = BitmapFont(FONT_FILENAME, 7, 9)
+        self.font = BitmapFont(FONT_FILENAME, 7, 9, colorkey=(0,0,0))
 
     def handle_event(self, event):
         if event.key == pygame.K_ESCAPE:

@@ -2,9 +2,11 @@ import pygame
 from pygame.locals import *
 
 class BitmapFont():
-    def __init__(self, font_filename, width, height):
+    def __init__(self, font_filename, width, height, colorkey=None):
         '''Load the font spritesheet onto a surface'''
         self._image = pygame.image.load(font_filename)
+        if colorkey:
+            self._image.set_colorkey(colorkey)
         self._char_width = width
         self._char_height = height
         self._cols = int(self._image.get_rect().width / self._char_width)
