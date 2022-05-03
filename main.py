@@ -79,6 +79,9 @@ class Line(Tool):
 
     def activate(self):
         super().activate()
+        self.reset_pos()
+
+    def reset_pos(self):
         self.start_pos = None
         self.end_pos = None
 
@@ -98,18 +101,20 @@ class Line(Tool):
     def button_down(self):
         if not self.start_pos:
             self.start_pos = self.mouse_pos
+        else:
+            if not self.end_pos:
+                self.end_pos = self.mouse_pos
 
     def button_up(self):
-        if self.start_pos:
+        if self.start_pos and self.end_pos:
             self.apply()
 
     def apply(self):
         pygame.draw.aaline(self.canvas, colour_line, self.start_pos, self.mouse_pos, 1)
-        self.start_pos = self.mouse_pos
+        self.reset_pos()
 
     def exit(self):
-        self.start_pos = None
-        self.end_pos = None
+        self.reset_pos()
         super().exit()
 
 class Type(Tool):
