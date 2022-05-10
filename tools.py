@@ -124,7 +124,7 @@ class Rect(Line):
                 self.width = -self.width
                 self.left = self.mouse_pos[0]
 
-            self.height = self.mouse_pos[1] - self.top 
+            self.height = self.mouse_pos[1] - self.top
             if self.height < 0:
                 self.height = -self.height
                 self.top = self.mouse_pos[1]
@@ -153,25 +153,51 @@ class Type(Tool):
     name = 'Type'
     def __init__(self, app):
         super().__init__(app)
-        self.text = ''
         self.font = BitmapFont(config.FONT_FILENAME, config.FONT_WIDTH, config.FONT_HEIGHT, colorkey=(0,0,0))
+        self.init_text()
+
+    def init_text(self):
+        self.rows = 1
+        self.text = ''
+        self.discarded_first_char = False
 
     def handle_event(self, event):
         if event.key == pygame.K_ESCAPE:
             self.text = ''
             self.exit()
-        elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
+        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
             self.text += '\n'
+            self.rows += 1
         elif event.key == pygame.K_BACKSPACE:
-            self.text = self.text[:-1]
+            if len(self.text) > 0:
+                if self.text[-1] == '\n':
+                    self.rows -= 1
+                self.text = self.text[:-1]
         else:
-            self.text += event.unicode
+            if self.discarded_first_char:
+                self.text += event.unicode
+            else:
+                self.discarded_first_char = True
+
+    @property
+    def len_last_row(self):
+        return len(self.text.split('\n')[-1])
+
+    def draw_text_cursor_pos(self):
+        left = self.mouse_pos[0] + self.len_last_row * config.FONT_WIDTH
+        top = self.mouse_pos[1] + (self.rows - 1) * config.FONT_HEIGHT
+        pygame.draw.rect(self.screen, self.app.fg_colour, (left, top, config.FONT_WIDTH, config.FONT_HEIGHT), 0)
 
     def draw_cursor(self):
         self.font.draw(self.screen, self.text, *self.mouse_pos)
+        self.draw_text_cursor_pos()
 
     def button_down(self):
         self.apply()
 
     def apply(self):
         self.font.draw(self.canvas, self.text, *self.mouse_pos)
+
+    def exit(self):
+        self.init_text()
+        super().exit()
