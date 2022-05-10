@@ -1,0 +1,5 @@
+# all virtual environments including .venv310 etc
+.venv*
+
+# caches which might have some secrets
+*cache*
