@@ -2,6 +2,8 @@ import pygame
 from tools import Pencil, Line, Circle, Type
 import config
 from bitmapfont import BitmapFont
+from loguru import logger
+import settings
 
 ''' App: contains several Scenes
     Scene: describes a particular stage of an App, does not necessarily display anything
@@ -14,10 +16,6 @@ SCREEN_WIDTH = config.SCREEN_WIDTH
 SCREEN_HEIGHT = config.SCREEN_HEIGHT
 
 BOTTOM_BAR_Y_POS = config.SCREEN_HEIGHT - config.FONT_HEIGHT
-
-
-
-
 
 
 class Display:
@@ -147,5 +145,10 @@ def main():
     a = App()
     a.run()
 
+def example_func():
+    a = 5 * 5
+    logger.debug(f"Some useful info: {a}")
+
 if __name__ == '__main__':
-    main()
+    # main()
+    example_func()

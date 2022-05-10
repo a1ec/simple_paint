@@ -1,3 +1,7 @@
+from loguru import logger
+
+logger.debug("Config params read")
+
 SCREEN_WIDTH = 320
 SCREEN_HEIGHT = 240
 REFRESH_RATE_HZ = 100

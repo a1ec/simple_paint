@@ -1,0 +1,4 @@
+2022-05-10 at 20:16:26 | SUCCESS    | __init__:<module>:25 - Logger setup from /home/izzlee/repos/simple_paint/settings/__init__.py | 0
+2022-05-10 at 20:16:26 | DEBUG    | __init__:<module>:26 - serial_logloc: /home/izzlee/repos/simple_paint/settings/logs/serialized.log | 0
+2022-05-10 at 20:16:26 | DEBUG    | __init__:<module>:27 - debug_logloc: /home/izzlee/repos/simple_paint/settings/logs/serialized.log | 0
+2022-05-10 at 20:20:15 | DEBUG    | main:example_func:150 - Some useful info: 25 | 0
