@@ -1,5 +1,5 @@
 import pygame
-from tools import Pencil, Line, Circle, Type
+from tools import Pencil, Line, Rect, Circle, Type
 import config
 from bitmapfont import BitmapFont
 
@@ -14,11 +14,8 @@ SCREEN_WIDTH = config.SCREEN_WIDTH
 SCREEN_HEIGHT = config.SCREEN_HEIGHT
 
 BOTTOM_BAR_Y_POS = config.SCREEN_HEIGHT - config.FONT_HEIGHT
-
-
-
-
-
+CURSOR_COORDS_STR_LEN = len(f'{SCREEN_WIDTH},{SCREEN_HEIGHT}')
+CURSOR_COORDS_X_POS = config.SCREEN_WIDTH - config.FONT_WIDTH * CURSOR_COORDS_STR_LEN
 
 class Display:
     def __init__(self, width, height):
@@ -40,6 +37,7 @@ class App:
         self.font = BitmapFont(config.FONT_FILENAME, config.FONT_WIDTH, config.FONT_HEIGHT)
         pygame.key.set_repeat(config.KEY_HOLD_DELAY_MILLISECONDS, config.KEY_HOLD_INTERVAL_MILLISECONDS)
         self.mouse_pos = pygame.mouse.get_pos()
+        self.mouse_rel = pygame.mouse.get_rel()
         self.bg_colour = config.BG_COLOUR
         self.fg_colour = config.FG_COLOUR
 
@@ -50,6 +48,7 @@ class App:
         self.tools = {
             'pencil': Pencil(self),
             'line': Line(self),
+            'rect': Rect(self),
             'circle': Circle(self),
             'type': Type(self),
         }
@@ -78,14 +77,19 @@ class App:
         if event.key == pygame.K_e:
             self.clear_canvas()
         else:
+            tool_name = None
             if event.key == pygame.K_d:
-                self.tools['pencil'].activate()
+                tool_name = 'pencil'
             elif event.key == pygame.K_l:
-                self.tools['line'].activate()
+                tool_name = 'line'
+            elif event.key == pygame.K_r:
+                tool_name = 'rect'
             elif event.key == pygame.K_c:
-                self.tools['circle'].activate()
+                tool_name = 'circle'
             elif event.key == pygame.K_t:
-                self.tools['type'].activate()
+                tool_name = 'type'
+            if tool_name:
+                self.tools[tool_name].activate()
 
     def handle_mouse_button_down(self):
         self.mouse_drag = True
@@ -100,7 +104,7 @@ class App:
     def draw_overlay(self):
         self.tool.draw_cursor()
         # display mouse co-ordinates
-        self.font.draw(self.screen, f'{self.mouse_pos[0]:03d},{self.mouse_pos[1]:03d}', 0, 0)
+        self.font.draw(self.screen, f'{self.mouse_pos[0]:03d},{self.mouse_pos[1]:03d}', CURSOR_COORDS_X_POS, BOTTOM_BAR_Y_POS)
 
         if self.ctrl_down:
             self.font.draw(self.screen, 'Q-Quit', 0, BOTTOM_BAR_Y_POS)
@@ -134,6 +138,7 @@ class App:
 
     def process_events(self):
         self.mouse_pos = pygame.mouse.get_pos()
+        self.mouse_rel = pygame.mouse.get_rel()
         if self.mouse_drag:
             self.tool.button_down()
 

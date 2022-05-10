@@ -13,12 +13,22 @@ class Tool:
     def mouse_pos(self):
         return self.app.mouse_pos
 
+    @property
+    def mouse_rel(self):
+        return self.app.mouse_rel
+
     def activate(self):
         self.app.tool_prev = self.app.tool
         self.app.tool = self
 
-    def draw_cursor(self):
+    def draw_dot(self):
         pygame.draw.line(self.screen, self.app.fg_colour, self.mouse_pos, self.mouse_pos, 1)
+
+    def draw_cursor(self):
+        self.draw_dot()
+
+    def draw_cursor_applied(self):
+        pass
 
     def handle_event(self, event):
         pass
@@ -55,7 +65,6 @@ class Line(Tool):
     def __init__(self, app):
         super().__init__(app)
         self.start_pos = None
-        self.end_pos = None
 
     def activate(self):
         super().activate()
@@ -63,7 +72,6 @@ class Line(Tool):
 
     def reset_pos(self):
         self.start_pos = None
-        self.end_pos = None
 
     def cancel(self):
         self.start_pos = None
@@ -72,30 +80,59 @@ class Line(Tool):
         if event.key == pygame.K_ESCAPE:
             self.cancel()
 
+    def draw_cursor_applied(self):
+        pygame.draw.line(self.screen, self.app.fg_colour, self.start_pos, self.mouse_pos, 1)
+
     def draw_cursor(self):
         if self.start_pos:
-            pygame.draw.aaline(self.screen, self.app.fg_colour, self.start_pos, self.mouse_pos, 1)
+            self.draw_cursor_applied()
         else:
-            pygame.draw.circle(self.screen, self.app.fg_colour, self.mouse_pos, 1)
+            self.draw_dot()
 
     def button_down(self):
         if not self.start_pos:
             self.start_pos = self.mouse_pos
-        else:
-            if not self.end_pos:
-                self.end_pos = self.mouse_pos
 
     def button_up(self):
-        if self.start_pos and self.end_pos:
+        if self.start_pos and self.start_pos != self.mouse_pos:
             self.apply()
 
     def apply(self):
-        pygame.draw.aaline(self.canvas, self.app.fg_colour, self.start_pos, self.mouse_pos, 1)
+        pygame.draw.line(self.canvas, self.app.fg_colour, self.start_pos, self.mouse_pos, 1)
         self.reset_pos()
 
     def exit(self):
         self.reset_pos()
         super().exit()
+
+class Rect(Line):
+    name = 'Rect'
+
+    def __init__(self, app):
+        super().__init__(app)
+        self.width = 0
+        self.height = 0
+
+    def draw_cursor_applied(self):
+        if self.start_pos:
+            self.left = self.start_pos[0]
+            self.top = self.start_pos[1]
+
+            # start_pos should be swapped with mouse_pos if the rect is drawn to the left
+            self.width = self.mouse_pos[0] - self.left
+            if self.width < 0:
+                self.width = -self.width
+                self.left = self.mouse_pos[0]
+
+            self.height = self.mouse_pos[1] - self.top 
+            if self.height < 0:
+                self.height = -self.height
+                self.top = self.mouse_pos[1]
+            pygame.draw.rect(self.screen, self.app.fg_colour, (self.left, self.top, self.width, self.height), 1)
+
+    def apply(self):
+        pygame.draw.rect(self.canvas, self.app.fg_colour, (self.left, self.top, self.width, self.height), 1)
+        self.reset_pos()
 
 class Circle(Line):
     name = 'Circle'
@@ -104,11 +141,9 @@ class Circle(Line):
         self.b = complex(*self.mouse_pos)
         return abs(self.b - self.a)
 
-    def draw_cursor(self):
+    def draw_cursor_applied(self):
         if self.start_pos:
             pygame.draw.circle(self.screen, self.app.fg_colour, self.start_pos, self.get_radius(), 1)
-        else:
-            pygame.draw.circle(self.screen, self.app.fg_colour, self.mouse_pos, 1)
 
     def apply(self):
         pygame.draw.circle(self.canvas, self.app.fg_colour, self.start_pos, self.get_radius(), 1)
