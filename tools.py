@@ -18,7 +18,7 @@ class Tool:
         self.app.tool = self
 
     def draw_cursor(self):
-        pygame.draw.circle(self.screen, self.app.fg_colour, self.mouse_pos, 1)
+        pygame.draw.line(self.screen, self.app.fg_colour, self.mouse_pos, self.mouse_pos, 1)
 
     def handle_event(self, event):
         pass
@@ -44,7 +44,7 @@ class Pencil(Tool):
         self.apply()
 
     def apply(self):
-        pygame.draw.circle(self.canvas, self.app.fg_colour, self.mouse_pos, 1)
+        pygame.draw.line(self.canvas, self.app.fg_colour, self.mouse_pos, self.mouse_pos, 1)
 
 class Line(Tool):
     ''' init state, no points, just draw dot

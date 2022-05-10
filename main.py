@@ -17,9 +17,7 @@ BOTTOM_BAR_Y_POS = config.SCREEN_HEIGHT - config.FONT_HEIGHT
 
 
 
-class InputContext:
-    def __init__(self):
-        pass
+
 
 
 class Display:
@@ -36,6 +34,7 @@ class App:
         self.screen = self.display.screen
         self.clock = self.display.clock
         self.is_running = False
+        self.mouse_drag = False
         self.ctrl_down = False
         self.shift_down = False
         self.font = BitmapFont(config.FONT_FILENAME, config.FONT_WIDTH, config.FONT_HEIGHT)
@@ -89,10 +88,11 @@ class App:
                 self.tools['type'].activate()
 
     def handle_mouse_button_down(self):
-        self.tool.button_down()
+        self.mouse_drag = True
 
     def handle_mouse_button_up(self):
         self.tool.button_up()
+        self.mouse_drag = False
 
     def clear_canvas(self):
         self.canvas.fill(self.bg_colour)
@@ -103,13 +103,9 @@ class App:
         self.font.draw(self.screen, f'{self.mouse_pos[0]:03d},{self.mouse_pos[1]:03d}', 0, 0)
 
         if self.ctrl_down:
-            self.font.draw(self.screen, 'CTRL  Q-Quit', 0, BOTTOM_BAR_Y_POS)
-
-        if self.shift_down:
-            self.font.draw(self.screen, 'SHIFT D-Draw    L-Line   C-Circle    T-Text   E-Erase', 0, BOTTOM_BAR_Y_POS)
-
-    def update_mouse_pos(self):
-        self.mouse_pos = pygame.mouse.get_pos()
+            self.font.draw(self.screen, 'Q-Quit', 0, BOTTOM_BAR_Y_POS)
+        elif self.shift_down:
+            self.font.draw(self.screen, 'D-Draw    L-Line   C-Circle    T-Text   E-Erase', 0, BOTTOM_BAR_Y_POS)
 
     def update_gfx(self):
         # copy canvas to screen buffer
@@ -120,7 +116,6 @@ class App:
 
     def get_events(self):
         '''Handles user interactivity e.g. keyboard and mouse input'''
-        self.update_mouse_pos()
         for event in pygame.event.get():
             # App handles below
             if event.type == pygame.QUIT:
@@ -137,9 +132,15 @@ class App:
                 else:
                     self.tool.handle_event(event)
 
+    def process_events(self):
+        self.mouse_pos = pygame.mouse.get_pos()
+        if self.mouse_drag:
+            self.tool.button_down()
+
     def update(self):
         self.reset_keys_mouse_state()
         self.get_events()
+        self.process_events()
         self.update_gfx()
 
 def main():
