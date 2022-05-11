@@ -128,10 +128,10 @@ class Rect(Line):
             if self.height < 0:
                 self.height = -self.height
                 self.top = self.mouse_pos[1]
-            pygame.draw.rect(self.screen, self.app.fg_colour, (self.left, self.top, self.width, self.height), 1)
+            pygame.draw.rect(self.screen, self.app.fg_colour, (self.left, self.top, self.width, self.height), self.app.line_thickness)
 
     def apply(self):
-        pygame.draw.rect(self.canvas, self.app.fg_colour, (self.left, self.top, self.width, self.height), 1)
+        pygame.draw.rect(self.canvas, self.app.fg_colour, (self.left, self.top, self.width, self.height), self.app.line_thickness)
         self.reset_pos()
 
 class Circle(Line):
@@ -143,10 +143,10 @@ class Circle(Line):
 
     def draw_cursor_applied(self):
         if self.start_pos:
-            pygame.draw.circle(self.screen, self.app.fg_colour, self.start_pos, self.get_radius(), 1)
+            pygame.draw.circle(self.screen, self.app.fg_colour, self.start_pos, self.get_radius(), self.app.line_thickness)
 
     def apply(self):
-        pygame.draw.circle(self.canvas, self.app.fg_colour, self.start_pos, self.get_radius(), 1)
+        pygame.draw.circle(self.canvas, self.app.fg_colour, self.start_pos, self.get_radius(), self.app.line_thickness)
         self.reset_pos()
 
 class Type(Tool):

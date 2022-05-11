@@ -34,6 +34,9 @@ class App:
         self.mouse_drag = False
         self.ctrl_down = False
         self.shift_down = False
+        self.fill_mode = False
+        self.line_thickness = 1
+        self.prev_thickness = 1
         self.font = BitmapFont(config.FONT_FILENAME, config.FONT_WIDTH, config.FONT_HEIGHT)
         pygame.key.set_repeat(config.KEY_HOLD_DELAY_MILLISECONDS, config.KEY_HOLD_INTERVAL_MILLISECONDS)
         self.mouse_pos = pygame.mouse.get_pos()
@@ -64,6 +67,14 @@ class App:
         while self.is_running:
             self.update()
 
+    def toggle_fill_mode(self):
+        self.fill_mode = not self.fill_mode
+        if self.fill_mode:
+            self.prev_thickness = self.line_thickness
+            self.line_thickness = 0
+        else:
+            self.line_thickness = self.prev_thickness
+
     def handle_quit(self):
         self.is_running = False
 
@@ -71,25 +82,26 @@ class App:
         self.ctrl_down = True
         if event.key == pygame.K_q:
             self.handle_quit()
+        if event.key == pygame.K_f:
+            self.toggle_fill_mode()
+        if event.key == pygame.K_e:
+            self.clear_canvas()
 
     def handle_shift_down(self, event):
         self.shift_down = True
-        if event.key == pygame.K_e:
-            self.clear_canvas()
-        else:
-            tool_name = None
-            if event.key == pygame.K_d:
-                tool_name = 'pencil'
-            elif event.key == pygame.K_l:
-                tool_name = 'line'
-            elif event.key == pygame.K_r:
-                tool_name = 'rect'
-            elif event.key == pygame.K_c:
-                tool_name = 'circle'
-            elif event.key == pygame.K_t:
-                tool_name = 'type'
-            if tool_name:
-                self.tools[tool_name].activate()
+        tool_name = None
+        if event.key == pygame.K_d:
+            tool_name = 'pencil'
+        elif event.key == pygame.K_l:
+            tool_name = 'line'
+        elif event.key == pygame.K_r:
+            tool_name = 'rect'
+        elif event.key == pygame.K_c:
+            tool_name = 'circle'
+        elif event.key == pygame.K_t:
+            tool_name = 'type'
+        if tool_name:
+            self.tools[tool_name].activate()
 
     def handle_mouse_button_down(self):
         self.mouse_drag = True
