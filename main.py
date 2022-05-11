@@ -17,6 +17,31 @@ BOTTOM_BAR_Y_POS = config.SCREEN_HEIGHT - config.FONT_HEIGHT
 CURSOR_COORDS_STR_LEN = len(f'{SCREEN_WIDTH},{SCREEN_HEIGHT}')
 CURSOR_COORDS_X_POS = config.SCREEN_WIDTH - config.FONT_WIDTH * CURSOR_COORDS_STR_LEN
 
+class Palette:
+    def __init__(self):
+        self.colours = [config.BLACK, config.WHITE, config.BLUE, config.ORANGE]
+        self.palette = pygame.Surface((len(self.colours), 1))
+        self.display = pygame.Surface((len(self.colours) * config.FONT_WIDTH, config.FONT_HEIGHT))
+        self.index = 0
+        self.init_palette()
+        self.refresh_surface()
+
+    @property
+    def current_colour(self):
+        return self.colours[self.index]
+
+    def init_palette(self):
+        for i, colour in enumerate(self.colours):
+            pygame.draw.line(self.palette, colour, (i, 0), (i, 0), 1)
+
+    def refresh_surface(self):
+        pygame.transform.scale(self.palette, (len(self.colours) * config.FONT_WIDTH, config.FONT_HEIGHT), \
+                               dest_surface=self.display)
+
+    def next(self):
+        self.index += 1
+        self.index %= len(self.colours)
+
 class Display:
     def __init__(self, width, height):
         self.screen = pygame.display.set_mode((width, height), pygame.SCALED)
@@ -28,6 +53,8 @@ class App:
         'Set the name of the EventHandler e.g. menu, character select, bonus'
         self.display = Display(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.canvas = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.palette = Palette()
+
         self.screen = self.display.screen
         self.clock = self.display.clock
         self.is_running = False
@@ -38,6 +65,7 @@ class App:
         self.line_thickness = 1
         self.prev_thickness = 1
         self.font = BitmapFont(config.FONT_FILENAME, config.FONT_WIDTH, config.FONT_HEIGHT)
+
         pygame.key.set_repeat(config.KEY_HOLD_DELAY_MILLISECONDS, config.KEY_HOLD_INTERVAL_MILLISECONDS)
         self.mouse_pos = pygame.mouse.get_pos()
         self.mouse_rel = pygame.mouse.get_rel()
@@ -86,6 +114,9 @@ class App:
             self.toggle_fill_mode()
         if event.key == pygame.K_e:
             self.clear_canvas()
+        if event.key == pygame.K_BACKQUOTE:
+            self.palette.next()
+            self.fg_colour = self.palette.current_colour
 
     def handle_shift_down(self, event):
         self.shift_down = True
@@ -117,6 +148,7 @@ class App:
         self.tool.draw_cursor()
         # display mouse co-ordinates
         self.font.draw(self.screen, f'{self.mouse_pos[0]:03d},{self.mouse_pos[1]:03d}', CURSOR_COORDS_X_POS, BOTTOM_BAR_Y_POS)
+        self.screen.blit(self.palette.display, (0, BOTTOM_BAR_Y_POS))
 
         if self.ctrl_down:
             self.font.draw(self.screen, 'Q-Quit', 0, BOTTOM_BAR_Y_POS)
@@ -131,7 +163,7 @@ class App:
         self.clock.tick(config.REFRESH_RATE_HZ)
 
     def get_events(self):
-        '''Handles user interactivity e.g. keyboard and mouse input'''
+        'Handles user interactivity e.g. keyboard and mouse input'
         for event in pygame.event.get():
             # App handles below
             if event.type == pygame.QUIT:
