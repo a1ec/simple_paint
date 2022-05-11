@@ -153,13 +153,14 @@ class Type(Tool):
     name = 'Type'
     def __init__(self, app):
         super().__init__(app)
-        self.font = BitmapFont(config.FONT_FILENAME, config.FONT_WIDTH, config.FONT_HEIGHT, colorkey=(0,0,0))
+        # any black in the original font will be transparent
+        self.font = BitmapFont(config.FONT_FILENAME, config.FONT_WIDTH, config.FONT_HEIGHT, colorkey=config.BLACK)
         self.init_text()
 
     def init_text(self):
         self.rows = 1
         self.text = ''
-        self.discarded_first_char = False
+        self.dropped_first_char = False
 
     def handle_event(self, event):
         if event.key == pygame.K_ESCAPE:
@@ -174,10 +175,10 @@ class Type(Tool):
                     self.rows -= 1
                 self.text = self.text[:-1]
         else:
-            if self.discarded_first_char:
+            if self.dropped_first_char:
                 self.text += event.unicode
             else:
-                self.discarded_first_char = True
+                self.dropped_first_char = True
 
     @property
     def len_last_row(self):
@@ -189,14 +190,14 @@ class Type(Tool):
         pygame.draw.rect(self.screen, self.app.fg_colour, (left, top, config.FONT_WIDTH, config.FONT_HEIGHT), 0)
 
     def draw_cursor(self):
-        self.font.draw(self.screen, self.text, *self.mouse_pos)
+        self.font.draw_text(self.text, self.screen, *self.mouse_pos)
         self.draw_text_cursor_pos()
 
     def button_down(self):
         self.apply()
 
     def apply(self):
-        self.font.draw(self.canvas, self.text, *self.mouse_pos)
+        self.font.draw_text(self.text, self.canvas, *self.mouse_pos)
 
     def exit(self):
         self.init_text()

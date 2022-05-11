@@ -20,7 +20,7 @@ CURSOR_COORDS_X_POS = config.SCREEN_WIDTH - config.FONT_WIDTH * CURSOR_COORDS_ST
 class Palette:
     def __init__(self):
         self.colours = [config.BLACK, config.WHITE, config.BLUE, config.ORANGE]
-        self.palette = pygame.Surface((len(self.colours), 1))
+        self.surface = pygame.Surface((len(self.colours), 1))
         self.display = pygame.Surface((len(self.colours) * config.FONT_WIDTH, config.FONT_HEIGHT))
         self.index = 0
         self.init_palette()
@@ -32,10 +32,10 @@ class Palette:
 
     def init_palette(self):
         for i, colour in enumerate(self.colours):
-            pygame.draw.line(self.palette, colour, (i, 0), (i, 0), 1)
+            pygame.draw.line(self.surface, colour, (i, 0), (i, 0), 1)
 
     def refresh_surface(self):
-        pygame.transform.scale(self.palette, (len(self.colours) * config.FONT_WIDTH, config.FONT_HEIGHT), \
+        pygame.transform.scale(self.surface, (len(self.colours) * config.FONT_WIDTH, config.FONT_HEIGHT), \
                                dest_surface=self.display)
 
     def next(self):
@@ -120,6 +120,9 @@ class App:
 
     def handle_shift_down(self, event):
         self.shift_down = True
+        if self.tool.name == 'Type':
+            # ignore shift commands while typing text
+            return
         tool_name = None
         if event.key == pygame.K_d:
             tool_name = 'pencil'
@@ -147,13 +150,13 @@ class App:
     def draw_overlay(self):
         self.tool.draw_cursor()
         # display mouse co-ordinates
-        self.font.draw(self.screen, f'{self.mouse_pos[0]:03d},{self.mouse_pos[1]:03d}', CURSOR_COORDS_X_POS, BOTTOM_BAR_Y_POS)
+        self.font.draw_text(f'{self.mouse_pos[0]:03d},{self.mouse_pos[1]:03d}', self.screen, CURSOR_COORDS_X_POS, BOTTOM_BAR_Y_POS)
         self.screen.blit(self.palette.display, (0, BOTTOM_BAR_Y_POS))
 
         if self.ctrl_down:
-            self.font.draw(self.screen, 'Q-Quit', 0, BOTTOM_BAR_Y_POS)
+            self.font.draw_text('Q-Quit', self.screen, 0, BOTTOM_BAR_Y_POS)
         elif self.shift_down:
-            self.font.draw(self.screen, 'D-Draw    L-Line   C-Circle    T-Text   E-Erase', 0, BOTTOM_BAR_Y_POS)
+            self.font.draw_text('D-Draw    L-Line   C-Circle    T-Text   E-Erase', self.screen, 0, BOTTOM_BAR_Y_POS)
 
     def update_gfx(self):
         # copy canvas to screen buffer
